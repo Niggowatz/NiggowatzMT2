@@ -1,0 +1,131 @@
+quest arena_manager begin
+	state start begin
+		when 20017.chat."Übungskämpfe" begin
+			if game.get_event_flag("arena_close") > 0 then
+				say_title("Yu-Hwan:")
+				say("Die Trainingshalle wurde nach einem")
+				say("verwüsterischen Kampf zerstört.")				
+				return
+			end
+			if not npc.lock() then
+				say_title("Yu-Hwan:")
+				say("Jemand anderes hat sich zum Üben angemeldet.")
+				return
+			end
+			local useMinLevel = 25
+			if pc.get_level() < useMinLevel then
+				say_title("Yuhwan:")
+				say("Ohne Level "..useMinLevel.." kann ich dich leider")
+				say("nicht teilnehmen lassen.")
+				npc.unlock()
+				return
+			else
+				say_title("Yuhwan:")
+				say("Sag mir den Namen der Person, mit welcher")
+				say("du trainieren möchtest.")
+				local sname = input()
+				if sname == "" then
+					say_title("Yu-Hwan:")
+					say("Weisst du nicht, mit wem du kämpfen")
+					say("willst?")
+					npc.unlock()
+					return
+				else
+					say_title("Yu-Hwan:")
+					say(""..pc.name.." hat "..sname.." zum Kampf aufgefordert!")
+					wait("")
+					local opp_vid = find_pc_by_name(sname)
+					if opp_vid == 0 then
+						say_title("Yu-Hwan:")
+						say(sname.." ist nicht online.")
+						npc.unlock()
+						return
+					elseif opp_vid == pc.get_vid() then
+						say_title("Yu-Hwan:")
+						say("Du willst nicht wirklich gegen dich")
+						say("selber kämpfen oder?")
+						npc.unlock()
+						return
+					end
+                    local old = pc.select(opp_vid)
+                    local opp_level = pc.get_level()
+                    pc.select(old)
+                    if opp_level < useMinLevel then
+						say_title("Yuhwan")          
+                        say("Dein Gegner ist noch nicht Level 25")
+                        npc.unlock()
+                        return
+                    end
+                    if not npc.is_near_vid(opp_vid, 10) then
+                        say_title("Yuhwan")
+                        say(""..sname.." ist nicht in deiner Nähe.")
+                        npc.unlock()
+                        return
+                    end
+                    local a = arena.is_in_arena(opp_vid)
+                    if a == 0 then
+                        say_title("Yuhwan:")
+                        say(""..sname.." kämpft bereits.")
+                        npc.unlock()
+                        return
+                    end
+                    say_title("Entscheidung")
+                    say(""..pc.name.." wartet darauf, dass "..sname.."")
+                    say("die Herausforderung annimmt.")
+                    local agree = confirm(opp_vid, "Möchtest du gegen "..pc.name.." kämpfen?", 30)
+                    if agree!= CONFIRM_OK then
+						say_title("Yuhwan:")
+                        say(""..sname.." hat abgelehnt.")
+                        npc.unlock()
+                        return
+                    end
+                    s = arena.start_duel(sname, 3)
+                    if s == 0 then
+                        say_title("Yu-Hwan:")
+                        say("Es gibt ein Problem.")
+                        say("Probierst du es später nochmal?")
+                    elseif s == 2 then
+                        say_title("Yu-Hwan:")
+                        say("Jemand anderes kämpft gerade.")
+                    elseif s == 3 then
+                        say_title("Yu-Hwan:")
+                        say("Die Trainingshalle ist inmoment voll.")
+                        say("Probiert es später nochmal.")
+                    end					
+				end				
+			end
+		end		
+		when 20017.chat."Beobachte einen Übungskampf" begin
+            local g = arena.get_duel_list()
+            local arena_name = {}
+            local arena_observer = {}
+            table.foreachi(g,
+                function(n, p)
+                arena_name[n] = p[1].." gegen "..p[2]
+                arena_observer[n] = { p[3], p[4], p[5] }
+                end
+            )
+            table.insert(arena_name, "Schließen")
+            table.insert(arena_observer, 0)
+            local count = table.getn(g)
+            if count == 0 then
+				say_title("Yu-Hwan:")
+				say("Zur Zeit kämpft niemand.")
+				return
+            else
+                say_title("Yu-Hwan:")
+                say("Momentan finden "..count.." Trainingskämpfe statt.")
+                wait()
+            end
+			if table.getn(g)!= 0 then
+                local s = select_table(arena_name)
+				if table.getn(arena_observer) == s then
+                    return
+                end
+				if table.getn(arena_observer) >= s then
+                    arena.add_observer(arena_observer[s][1], arena_observer[s][2], arena_observer[s][3])
+                end
+            end
+        end
+    end
+end

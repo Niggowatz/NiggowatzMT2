@@ -1,0 +1,63 @@
+quest fisher begin
+    state start begin
+		when 9009.chat."Ladenbenutzung" begin
+			npc.open_shop()
+			setskin(NOWINDOW)
+		end
+		when 9009.chat."Verbessern der Angelrute" begin
+			say_title("Fischer")
+            say("Du willst also etwas über die Geheimnisse")
+            say("der Angelrute erfahren?")
+            say("Um ehrlich zu sein ist es keine große Sache.")
+            say("Desto mehr Zeit du ins Angeln investierst, desto")
+            say("schneller steigt die Stufe der Angel. Wenn deine")
+            say("Angel genügen benutzt wurde kannst du sie zu mir")
+            say("bringen und ich werde versuchen sie zu verbessern.")     
+		end
+        when 9009.take with item.vnum<27400 or item.vnum>27590 begin
+            say_title("Fischer")
+            say("Ich kann nur Angeln verbessern.")
+        end
+        when 9009.take with item.vnum == 27590 begin
+            say_title("Fischer")
+            say("Diese Angeln kann nichtmehr verbessert werden.")
+        end
+        when 9009.take with item.vnum >= 27400 and item.vnum < 27590 and item.get_socket(0)!= item.get_value(2) begin
+            say_title("Fischer")
+            say("Die Angel wurde zu wenig benutzt, als dass")
+            say("ich sie verbessern kann.")
+        end
+        when 9009.take with item.vnum >= 27400 and item.vnum < 27590 and item.get_socket(0) == item.get_value(2) begin
+            say_title("Fischer")
+            say("Du möchtest deine Angel verbessern lassen?")
+            say("Lass mich sehen...")
+            say(string.format("Deine Angel ist Level %d.", item.get_value(0) / 10))
+            say("Hmm, ich glaub nicht, dass ich gut genug bin")
+			say("um diese Angel zu verbessern. Soll ich's probieren?")
+            say(string.format("Es kann sein, dass das Level deiner Angel Level %d von 100", 100 - item.get_value(3)))
+            say("verringert wird.")
+            say("Soll ich es trotzdem probieren?")
+            local s = select("Ja", "Nein")
+			if s == 1 then
+				local f = __fish_real_refine_rod(item.get_cell())
+				say_title("Fischer")
+                if f == 2 then					
+                    say("Leider habe ich es nicht geschafft deine")
+					say("Angel zu verbessern, aber sie wurde nicht zerstört.")                              
+                    say("Du wirst sie so zurück bekommen wie sie war.")
+                    say("")
+                elseif f == 1 then
+                    say("Hey, es hat geklappt!")
+                    say("Hier ist deine verbesserte Angel!")
+                else
+                    say("Verdammt es hat nicht geklappt!")
+                    say("Es tut mir leid, deine Angel wurde um ein Level")
+                    say("gesenkt. Ich hatte dich ja gewarnt!")
+                end
+			else
+                say_title("Fischer")
+                say("Komm später wieder.")
+            end
+        end
+    end
+end

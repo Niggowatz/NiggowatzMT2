@@ -1,0 +1,91 @@
+quest horse_menu begin
+    state start begin
+		function horse_menu()
+			if horse.is_mine() then
+				say_title("Pferdehandbuch")
+				say("Das Handbuch für das Pferd")
+				say("")
+				local s = 6
+				if horse.is_dead() then
+					s = select( "Zurückholen des Pferde", "Das Pferd zurück geben", "Schließen")
+					if s == 1 then s = 0
+					elseif s == 2 then s = 3
+					elseif s == 3 then return
+					end
+				else
+					s = select(
+					"Pferd füttern", "Pferd reiten", "Das Pferd zurückgeben", "Status des Pferdes anzeigen", 
+					"Pferd einen Namen geben", "Schließen")
+				end
+				if s == 0 then
+					horse.revive()
+				elseif s == 1 then
+					local food = horse.get_grade() + 50054 - 1
+					if pc.countitem(food) > 0 then
+						pc.removeitem(food, 1)
+						horse.feed()
+					else
+						say("Das Item "..item_name(food).." wird benötiogt.")
+						say("")
+					end
+				elseif s == 2 then
+					horse.ride()
+				elseif s == 3 then
+					horse.unsummon()
+				elseif s == 4 then
+					say_title("Pferdestatus")
+					say("Momentane Lebenspunkte des Pferdes: "..horse.get_health_pct().."%")
+					say("Momentane Ausdauer des Pferdes: "..horse.get_stamina_pct().."%")
+					say("")
+				elseif s == 5 then					
+					local old_horse_name = horse.get_name() ;
+					say_title("Pferdename")
+					say("Du kannst du deinem Pferd einen neuen")
+					say("Namen geben. Somit wird es einzigartig")
+					say("und bietet dir besseren Schutz.")
+					if string.len(old_horse_name) == 0 then
+						say_reward("Dein Pferd besitzt noch keinen Namen.")
+					else
+						say_reward("Der momentane Name deines Pferdes lautet "..old_horse_name..".")
+					end
+					say("Gib den neuen Pferdenamen ein.")
+					local horse_name = input()
+					if string.len(horse_name) < 2 then
+						say_title("Pferdename")
+						say("Der Name ist zu kurz.")
+						say("")
+						return
+					elseif string.len(horse_name) > 12 then
+						say_title("Pferdename")
+						say("Der Name ist zu lang.")
+						say("")
+						return
+					end
+					local ret = horse.set_name(horse_name)
+					say_title("Pferdename")
+					if ret == 0 then
+						say_reward("Du hast momentan kein Pferd!")
+						say("")
+					elseif ret == 1 then
+						say_reward("Du kannst diesen Namen nicht benutzen!")
+						say("")
+					elseif ret == 2 then
+						pc.remove_item("71110")
+						say("Du hast deinem Pferd einen neuen Namen gegeben!")
+						say("")
+					end
+				end
+			end
+		end
+		when 20030.click begin horse_menu.horse_menu() end
+		when 20101.click begin horse_menu.horse_menu() end
+		when 20102.click begin horse_menu.horse_menu() end
+		when 20103.click begin horse_menu.horse_menu() end
+		when 20104.click begin horse_menu.horse_menu() end
+		when 20105.click begin horse_menu.horse_menu() end
+		when 20106.click begin horse_menu.horse_menu() end
+		when 20107.click begin horse_menu.horse_menu() end
+		when 20108.click begin horse_menu.horse_menu() end
+		when 20109.click begin horse_menu.horse_menu() end
+    end
+end

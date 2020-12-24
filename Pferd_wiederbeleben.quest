@@ -1,0 +1,46 @@
+quest horse_revive begin
+	state start begin
+		when 50059.use begin
+			if not horse.is_dead() then
+				chat("Dein Pferd lebt, du brauchst das Kraut (noch) nicht")
+				return
+			end
+			if horse.get_level()==21 then
+				chat("Dein Millitärspferd wurde wiederbelebt!")
+				pc.removeitem("50059", 1)
+				horse.revive()
+			else
+				chat("Du besitzt das falsche Kraut")
+				return
+			end
+		end
+		when 50058.use begin
+			if not horse.is_dead() then
+				chat("Dein Pferd lebt, du brauchst das Kraut (noch) nicht")
+				return
+			end
+			if horse.get_level()==11 then
+				chat("Dein Kampfpferd wurde wiederbelebt!")
+				pc.removeitem("50058", 1)
+				horse.revive()
+			else
+				chat("Du besitzt das falsche Kraut")
+				return
+			end
+		end
+		when 50057.use begin
+			if not horse.is_dead() then
+				chat("Dein Pferd lebt, du brauchst das Kraut (noch) nicht")
+				return
+			end
+			if horse.get_level()==1 then
+				chat("Dein Ponny wurde wiederbelebt!")
+				pc.removeitem("50057", 1)
+				horse.revive()
+			else
+				chat("Du besitzt das falsche Kraut")
+				return
+			end
+		end
+	end
+end

@@ -1,0 +1,737 @@
+quest marriage_manage begin
+state start begin
+when oldwoman.chat."Ich will heiraten" with not pc.is_engaged_or_married() begin
+if not npc.lock() then
+say("Guten Tag")
+say("Moechtet Ihr tatsaechlich heiraten??")
+return
+end
+if pc.level < 25 then
+say("Nun denn...")
+say("Ich habe leider eine schlechte Nachricht..")
+say("Es sieht ganz so aus,")
+say("als ob Ihr nicht die")
+say("noetige Erfahrung ")
+say("fuer eine Hochzeit habt.")
+say("")
+say_reward("Kommt wieder, wenn Ihr das Level 25 erreicht habt.")
+say("")
+npc.unlock()
+return
+end
+
+local m_ring_num = pc.countitem(70301)
+local m_has_ring = m_ring_num > 0
+if not m_has_ring then
+say("Nun denn...")
+say("Euch fehlt etwas..")
+say("")
+say_item("Beide brauchen einen", 70301, "")
+say_reward("Kommt wieder, wenn ihr einen Verlobungsring habt.")
+say("")
+npc.unlock()
+
+return
+end
+
+local m_sex = pc.get_sex()
+if not marriage_manage.is_equip_wedding_dress() then
+say("Nun denn....")
+say("So wollt Ihr heiraten?")
+say("Euch fehlt die noetige Kleidung!")
+say("So kann man sich nicht sehen lassen!")
+say("")
+
+if m_sex==0 then
+say_item("Kleidung", marriage_manage.get_wedding_dress(pc.get_job()), "")
+say_reward("Nun denn...")
+say_reward("Einer hat keine Hochzeitskleidung!")
+else
+say_item("Kleidung", marriage_manage.get_wedding_dress(pc.get_job()), "")
+say_reward("Nun denn...")
+say_reward("Einer hat keine Hochzeitskleidung!")
+end
+say("")
+npc.unlock()
+return
+end
+
+local NEED_MONEY = 1000000
+if pc.get_money() < NEED_MONEY then
+say("Nun denn...")
+say("Etwas kostet das schoene Spielchen..")
+say("Und ihr scheint")
+say("nicht das noetige Geld zu haben!")
+say("Kommt doch wieder, wenn ihr 1.000.000 Yang habt.")
+say("")
+say_reward(string.format("??¡ÓB?O????*n %d?U??", NEED_MONEY/10000))
+say("")
+npc.unlock()
+return
+end
+
+say("Alte Frau:")
+say("Jetzt bist du erwachsen und")
+say("kannst heiraten.")
+say("Mit wem willst du heiraten?")
+say("")
+say_reward("Bitte gib den Namen ein:")
+
+local sname = input()
+if sname == "" then
+say("Alte Frau:")
+say("Du musst keine Angst vor")
+say("dem Heiraten haben.")
+say("Komme wieder, wenn du")
+say("die richtige Entscheidung getroffen hast.")
+say("")
+npc.unlock()
+return
+end
+
+local u_vid = find_pc_by_name(sname)
+local m_vid = pc.get_vid()
+if u_vid == 0 then
+say("Alte Frau:")
+say("Du weisstden Namen nicht?")
+say("Nun gut - Komme wieder, wenn du")
+say("den richtigen Namen kennst.")
+say("")
+say_reward(string.format("%s aehnliche Namen wie", sname))
+say("")
+npc.unlock()
+return
+end
+
+if not npc.is_near_vid(u_vid, 10) then
+say("Alte Frau:")
+say("Die Person, mt der du Heiraten")
+say("willst, muss auch bei mir sein.")
+say("Suche die Person und")
+say("kommt dann zu mir zurueck.")
+say("")
+say_reward(string.format("%s ist die Distanz zu", sname))
+say("")
+npc.unlock()
+return
+end
+
+local old = pc.select(u_vid)
+local u_level = pc.get_level()
+local u_job = pc.get_job()
+local u_sex = pc.get_sex()
+local u_name = pc.name
+local u_gold = pc.get_money()
+local u_married = pc.is_married()
+local u_has_ring = pc.countitem(70301) > 0
+local u_wear = marriage_manage.is_equip_wedding_dress()
+pc.select(old)
+local m_level = pc.get_level()
+
+if u_vid == m_vid then
+say("Alte Frau:")
+say("Das ist doch dein eigener Name.")
+say("")
+say_reward("Du kannst dich nicht selber heiraten.")
+say("")
+npc.unlock()
+return
+end
+
+if u_sex == m_sex then
+say("Alte Frau:")
+say("Es tut mir Leid, aber")
+say("ich kann keine gleichgeschlechtlichen")
+say("Ehen zulassen.")
+say("")
+say_reward("Keine gleichgeschlechtliche Ehe moeglich!")
+say("")
+npc.unlock()
+return
+end
+
+if u_married then
+say("Alte Frau:")
+say("Wusstest du nicht, dass die")
+say("Person schon verheiratet ist?")
+say("Du solltest nicht zu voreilig sein.")
+say("")
+say_reward(string.format("%s verheiratet gewesen.", sname))
+say("")
+npc.unlock()
+return
+end
+
+if u_level < 25 then
+say("Alte Frau:")
+say("Die Person ist noch zu jung.")
+say("Junge und alte Menschen haben")
+say("verschiedene Beduerfnisse...")
+say("")
+say_reward("Die Person muss das Level 25")
+say_reward("erreichen, bevor Sie heiraten kann.")
+say("")
+npc.unlock()
+return
+end
+
+if m_level - u_level > 15 or u_level - m_level > 15 then
+say("AlteFrau:")
+say("Euer Levelunterschied ist einfach zu hoch.")
+say("Das wuerde nur Probleme geben...")
+say("Das kann ich einfach nicht zulassen.")
+say("")
+say_reward("Charaktere mit mehr als 15 Leveln ")
+say_reward("Unterschied koennen nicht heiraten.")
+say("")
+npc.unlock()
+return
+end
+
+if not u_has_ring then
+if m_ring_num >= 2 then
+say("Alte Frau:")
+say("Um zu eiraten, brauchst du ein")
+say("Zeichen der Liebe.")
+say("Komme wieder, wenn du eines")
+say("hast.")
+else
+say("Alte Frau:")
+say("Denke daran, ein Zeichen")
+say("der Liebe zu tragen.")
+say("")
+end
+
+say_item("Als Zeichen der Liebe verwendbar.", 70301, "")
+say_reward("Die andere Person muss")
+say_reward("auch ein Zeichen der Liebe tragen.")
+say("")
+npc.unlock()
+return
+end
+
+if not u_wear then
+say("Alte Frau:")
+say("Du hast keine Hochzeitskleidung an.")
+say("Es waere Peinlich, mit einer Ruestung")
+say("zu heiraten.")
+say("Komme wieder, wenn du dich")
+say("passend eingekleidet hast.")
+say("")
+if u_sex==0 then
+say_item("Kleidung", marriage_manage.get_wedding_dress(u_job), "")
+say_reward("Um zu heiraten, musst du diese")
+say_reward("Kleidung tragen.")
+else
+say_item("Kleidung", marriage_manage.get_wedding_dress(u_job), "")
+say_reward("Um zu heiraten, musst du")
+say_reward("ein Hochzeitskleid tragen.")
+end
+say("")
+npc.unlock()
+return
+end
+
+
+local ok_sign = confirm( u_vid, "Willst du"..pc.name.. "heiraten?", 30)
+if ok_sign == CONFIRM_OK then
+local m_name = pc.name
+if pc.get_gold()>=NEED_MONEY then
+pc.change_gold(-NEED_MONEY)
+
+pc.removeitem(70301, 1)
+pc.give_item2(70302, 1)
+local old = pc.select(u_vid)
+pc.removeitem(70301, 1)
+pc.give_item2(70302, 1)
+pc.select(old)
+
+say("Alte Frau:")
+say("Wir sind nun bereit, um")
+say("die Hochzeit veranstalten zu koennen.")
+say("Zum Ausdruck meiner Liebe zu euch")
+say("spreche ich euch nun den Segen aus.")
+say("Die Hochzeit findet auf der Insel der")
+say("Liebe statt. ")
+say("")
+say_reward("Ich schicke euch nun")
+say_reward("zur Insel der Liebe.")
+say("")
+wait()
+setskin(NOWINDOW)
+marriage.engage_to(u_vid)
+end
+else
+say("Alte Frau:")
+say("Dein Partner will dich nicht heiraten.")
+say("Ein Gespraech wird euch")
+say("sicherlich helfen.")
+say("")
+say_reward("Dein Partner weigerte sich,")
+say_reward("zu heiraten.")
+end
+say("")
+npc.unlock()
+end
+-- ?? ???? ???? ??? ??
+
+when oldwoman.chat."zur Hochzeit" with pc.is_engaged() begin
+say("Nun denn..")
+say("Euer Ehepartner")
+say("befindet sich nicht in eurem Reich!!!")
+say("")
+wait()
+setskin(NOWINDOW)
+marriage.warp_to_my_marriage_map()
+end
+
+
+when 9011.chat."Ehe anerkennen" with pc.is_engaged() and marriage.in_my_wedding() begin
+if not npc.lock() then
+say("Nun denn..")
+say("Euer Partner ist entweder verheiratet oder")
+say("befindet sich in einem anderen Reich!")
+say("")
+return
+end
+say("Sofern der Partner")
+say("in einem anderen Reich ist,")
+say("kann er es jederzeit ueber das Item")
+say("Tinktur der Reiche das Reich wechseln.")
+say("Eine Scheidung kann den Ehepartner loesen.")
+
+local sname = input()
+local u_vid = find_pc_by_name(sname)
+local m_vid = pc.get_vid()
+
+if u_vid == 0 then
+say("Ihr seid zu")
+say("schwach um mit eurem Partner")
+say("zu heiraten...")
+say("")
+say_reward(string.format("%s Parallelen zu", sname))
+say("")
+npc.unlock()
+return
+end
+
+if not npc.is_near_vid(u_vid, 10) then
+say("Nun denn..")
+say("Eine Heirat innerhalb")
+say("eines Geschlechts ist nicht moeglich.")
+say("")
+say("")
+say_reward(string.format("%s zu dir bewegen muss sich", sname))
+say("")
+npc.unlock()
+return
+end
+
+if u_vid == m_vid then
+say("Nun denn...")
+say("Euer Geschlecht ist gleich!")
+say("")
+say_reward("Ihr muesst euer Geschlecht aendern.")
+say("")
+npc.unlock()
+return
+end
+
+if u_vid != marriage.find_married_vid() then
+say("Nun denn...")
+say("Euer Ehepartner ist nicht")
+say("in eurer Naehe!")
+say("")
+npc.unlock()
+return
+end
+
+local ok_sign = confirm(u_vid, "Willst du"..pc.name.. "heiraten??", 30)
+if ok_sign != CONFIRM_OK then
+say("Nun denn...")
+say("Ihr wollt heiraten...")
+say("So soll es sein!")
+say("")
+npc.unlock()
+return
+end
+say("Nehmt noch")
+say("diesen Ehering mit!")
+say("")
+marriage.set_to_marriage()
+
+-- 2005.04.12.??? ?? ?? ??
+-----------------------------------------------
+-- say("Hier habt Ihr ihn!")
+-- say("Ich wuensche euch viel Erfolg!")
+-- marriage_manage.give_wedding_gift()
+-- old = pc.select(u_vid)
+-- marriage_manage.give_wedding_gift()
+-- pc.select(old)
+say("")
+say_reward("Ihr habt einen Ehering erhalten.")
+say("")
+notice_all(pc.get_name()," und ", sname, " sind jetzt miteinander verheiratet.")
+npc.unlock()
+end
+
+function give_wedding_gift()
+local male_item = {71072, 71073, 71074}
+local female_item = {71069, 71070, 71071}
+if pc.get_sex() == MALE then
+pc.give_item2(male_item[number(1, 3)], 1)
+else
+pc.give_item2(female_item[number(1, 3)], 1)
+end
+end
+
+-- ??? ???? ?? ????? ?? ??
+-- ?? pc.is_married() and marriage.in_my_wedding()
+
+-- ??? ?? ??? ??? ?? ????
+when 9011.chat."Hochzeitsmusik starten" with
+(pc.is_engaged() or pc.is_married()) and
+marriage.in_my_wedding() and
+not marriage.wedding_is_playing_music() begin
+marriage.wedding_music(true, "wedding.mp3")
+setskin(NOWINDOW)
+end
+when 9011.chat." Hochzeitsmusik stoppen" with
+(pc.is_engaged() or pc.is_married()) and
+marriage.in_my_wedding() and
+marriage.wedding_is_playing_music() begin
+marriage.wedding_music(false, "default")
+setskin(NOWINDOW)
+end
+when 9011.chat."Tageszeit zu Nacht aendern" with
+pc.is_married() and
+marriage.in_my_wedding() begin
+marriage.wedding_dark(true)
+setskin(NOWINDOW)
+end
+
+when 9011.chat."Schneefall starten" with pc.is_married() and marriage.in_my_wedding() begin
+marriage.wedding_snow(true)
+setskin(NOWINDOW)
+end
+
+when 9011.chat."Hochzeit beenden" with pc.is_married() and marriage.in_my_wedding() begin
+if not npc.lock() then
+say("Hochzeitsplanerin:")
+say("Willst du nun die Hochzeit beenden?")
+say("")
+return
+end
+
+say("Hochzeitsplanerin:")
+say("Willst du das Fest wirklich beenden?")
+say("")
+local s = select("Ja","Nein")
+if s == 1 then
+local u_vid = marriage.find_married_vid()
+if u_vid == 0 then
+say("Um die Hochzeit zu beenden, muss")
+say("dein Partner zustimmen.")
+say("Nun, da dein Partner nicht da ist,")
+say("kann ich die Hochzeit nicht beenden.")
+say("")
+npc.unlock()
+return
+end
+say("Hochzeitsplanerin:")
+say("Um die Hochzeit zu beenden, muss")
+say("dein Partner zustimmen.")
+say("Ich warte auf die Antwort...")
+say("")
+local ok_sign = confirm(u_vid, "Willst du die Hochzeit beenden?", 30)
+if ok_sign == CONFIRM_OK then
+marriage.end_wedding() -- ??? ???? ??? ??.
+else
+say("Hochzeit beenden:")
+say("Die andere Person ist nicht einverstanden.")
+say("")
+end
+
+end
+
+npc.unlock()
+end
+
+-- ??? ???? ???? ??? ??
+when 11000.chat."Scheidung einreichen" or
+11002.chat." Scheidung einreichen" or
+11004.chat." Scheidung einreichen" with pc.is_married() begin
+
+if not marriage_manage.check_divorce_time() then
+return
+end
+
+local u_vid = marriage.find_married_vid()
+if u_vid == 0 or not npc.is_near_vid(u_vid, 10) then
+say("Waechter des Dorfplatzes:")
+say("Die Scheidung ist eine sehr ernste Angelegenheit!")
+say("Wenn du dich scheiden lassen willst,")
+say("muss dein Partner dabei sein.")
+say("")
+return
+end
+
+say("Waechter des Dorfplatzes:")
+say("Die Scheidung kostet 500.000 Yang.")
+say("Ausserdem muss die andere Person")
+say("zustimmen.")
+say("Willst du die Scheidung veranlassen?")
+say("")
+
+local MONEY_NEED_FOR_ONE = 500000
+local s = select("Ja", "Nein")
+
+if s == 1 then
+local m_enough_money = pc.gold > MONEY_NEED_FOR_ONE
+local m_have_ring = pc.countitem(70302) > 0
+
+local old = pc.select(u_vid)
+local u_enough_money = pc.gold > MONEY_NEED_FOR_ONE
+local u_have_ring = pc.countitem(70302) > 0
+pc.select(old)
+
+if not m_have_ring then
+say("Du musst den Ehering mitbringen.")
+return;
+end
+if not u_have_ring then
+say("Die andere Person muss den")
+say("Ehering auch mitbringen.")
+return;
+end
+
+if not m_enough_money then
+say("Waechter des Dorfplatzes:")
+say("Du hast nicht genug Yang fuer die Scheidung.")
+say("")
+say_reward(string.format("Die Scheidung kostet %dvon", MONEY_NEED_FOR_ONE/10000))
+say("")
+return;
+end
+if not u_enough_money then
+say("Waechter des Dorfplatzes::")
+say("Die andere Person hat nicht genug Yang.")
+say("")
+say_reward("Fuer die Scheidung muessen")
+say_reward("beide 500.000 Yang bezahlen.")
+say("")
+return;
+end
+
+say("Die Scheidung ist eine sehr")
+say("schmerzhafte Angelegenheit. Willst")
+say("du dich wirklich scheiden lassen?")
+say("")
+say("Wirklich? Du willst wirklich die Scheidung?")
+say("")
+
+local c=select("Ja", "Nein")
+if 2 == c then
+say_pc_name()
+say("Ich will die Scheidung, das")
+say("ist meine Entscheidung.")
+say("")
+wait()
+say("Waechter des Dorfplatzes:")
+say("So sei es...")
+say("Ihr seid 2 Personen, die weder zusammen")
+say("halten, noch ihr Leben geniessen.")
+say("")
+say_reward("Ich werde die Ehe mit der Scheidung beenden.")
+say("")
+return
+end
+
+local ok_sign = confirm(u_vid, pc.name.." willst du dich Scheiden lassen?", 30)
+if ok_sign == CONFIRM_OK then
+
+local m_enough_money = pc.gold > MONEY_NEED_FOR_ONE
+local m_have_ring = pc.countitem(70302) > 0
+
+local old = pc.select(u_vid)
+local u_enough_money = pc.gold > MONEY_NEED_FOR_ONE
+local u_have_ring = pc.countitem(70302) > 0
+pc.select(old)
+
+if m_have_ring and m_enough_money and u_have_ring and u_enough_money then
+pc.removeitem(70302, 1)
+pc.change_money(-MONEY_NEED_FOR_ONE)
+
+local old = pc.select(u_vid)
+pc.removeitem(70302, 1)
+pc.change_money(-MONEY_NEED_FOR_ONE)
+pc.select(old)
+
+say("Waechter des Dorfplatzes:")
+say("Die Scheidung war erfolgreich.")
+say("Ihr seid zwei verschiedene Menschen,")
+say("das kann man nicht aendern.")
+say("")
+say_reward("Scheidung erfolgreich abgeschlossen!")
+say("")
+marriage.remove()
+else
+say("Waechter des Dorfplatzes::")
+say("Ein Fehler ist aufgetreten.")
+say("Ich konnte euch nicht scheiden.")
+say("Versuche es spaeter erneut.")
+say("")
+say_reward("Scheidung fehlgeschlagen.")
+say("")
+end
+else
+say("Waechter des Dorfplatzes:")
+say("Die andere Person ist nicht einverstanden.")
+say("Kommt am besten zu mir, dann")
+say("reden wir ueber die Sache.")
+say("")
+say_reward("Die Scheidung wurde abgebrochen.")
+say("")
+end
+end
+end
+
+when 11000.chat."Ehering abgeben" or
+11002.chat." Ehering abgeben" or
+11004.chat." Ehering abgeben" with
+not pc.is_married() and
+pc.count_item(70302)>0
+begin
+say("Waechter des Dorfplatzes:")
+say("Du wirst die Schlechten Erinnerungen")
+say("schnell vergessen.")
+say("")
+say_reward("Der Ehering wurde erfolgreich entfernt.")
+pc.remove_item(70302)
+end
+
+when 11000.chat." Einseitige Scheidung" or
+11002.chat." Einseitige Scheidung" or
+11004.chat." Einseitige Scheidung" with pc.is_married() begin
+
+if not marriage_manage.check_divorce_time() then
+return
+end
+
+say("Waechter des Dorfplatzes:")
+say("Die einseitige Scheidung kostet dich 1.000.000 Yang.")
+say("Willst du das bezahlen?")
+say("")
+
+local s = select("Ja", "Das ist mir zuviel.")
+
+local NEED_MONEY = 1000000
+if s == 2 then
+return
+end
+
+if pc.money < NEED_MONEY then
+say("Waechter des Dorfplatzes:")
+say("Dein Yang reicht nicht fuer die Scheidung.")
+say("Eine Scheidung ist teuer.")
+say("Komme wieder, wenn du genug gespart hast.")
+say("")
+return
+end
+
+say("Waechter des Dorfplatzes:")
+say("Willst du wirklich die Scheidung?")
+say("Hast du es dir gut ueberlegt?")
+local c = select("Ich will die Scheidung!", "Ich ueberlege es mir noch.")
+
+if c == 2 then
+say("Waechter des Dorfplatzes:")
+say("Das ist die richtige Entscheidung. Geniesse dein")
+say("Leben.")
+say("Nicht immer haben beide die gleichen Meinungen.")
+say("")
+say_reward("Die Scheidung wurde abgebrochen.")
+say("")
+return
+end
+
+pc.removeitem(70302, 1)
+pc.change_gold(-NEED_MONEY)
+
+marriage.remove()
+
+say("Waechter des Dorfplatzes:")
+say("Da ihr eich nicht verstanden habt, seid ihr nun")
+say("geschieden.")
+say("Ich hoffe, du bist nun gluecklich.")
+say("")
+say_reward("Die einseitige Scheidung war erfolgreich.")
+say("")
+end
+
+-- ??? ?? ??
+when oldwoman.chat."Liste der Hochzeiten" with not pc.is_engaged() begin
+local t = marriage.get_wedding_list()
+if table.getn(t) == 0 then
+say("Im Moment findet keine Hochzeit statt.")
+say("")
+else
+-- chat(table.getn(t))
+local wedding_names = {}
+table.foreachi(t, function(n, p) wedding_names[n] = p[3].."und "..p[4].." Hochzeit" end)
+wedding_names[table.getn(t)+1] = locale.confirm
+local s = select_table(wedding_names)
+
+if s != table.getn(wedding_names) then
+marriage.join_wedding(t[s][1], t[s][2])
+end
+end
+end
+when 9011.click with not pc.is_engaged() and not pc.is_married() begin
+say("Hochzeitsplanerin:")
+say("Wir alle kamen hierher, um die Hochzeit")
+say("zu feiern.")
+say("Gesegnet sei das Paar.")
+say("")
+end
+
+function check_divorce_time()
+
+local DIVORCE_LIMIT_TIME = 86400
+
+if is_test_server() then
+DIVORCE_LIMIT_TIME = 60
+end
+
+if marriage.get_married_time() < DIVORCE_LIMIT_TIME then
+say("Hallenwaechter:")
+say("Jetzt ist genug gefeiert!!!")
+say("Alle raus hier!")
+say("")
+return false
+end
+
+return true
+end
+
+-- ?? ??? ?? ???? ??? ??
+-- ?? ?? : pc.is_engaged_or_married()
+function is_equip_wedding_dress()
+local a = pc.get_armor()
+return a >= 11901 and a <= 11904
+end
+function get_wedding_dress(pc_job)
+if 0==pc_job then
+return 11901
+elseif 1==pc_job then
+return 11903
+elseif 2==pc_job then
+return 11902
+elseif 3==pc_job then
+return 11904
+else
+return 0;
+end
+end
+end
+end 

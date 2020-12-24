@@ -1,0 +1,60 @@
+--Quest by Kimari--
+quest event_2 begin
+    state start begin
+        when 9003.chat."Mondlichttruhen-Event" with pc.is_gm() begin
+            if game.get_event_flag("event_2") != 1 then
+                say_title("Mondlichttruhen-Event")
+                say("")
+                say_reward("Das Mondlichttruhen Event ist Aus")
+                say_reward("Möchtest du es Starten?")
+                local a = select("Ja", "Nein")
+                if a == 1 then
+                    say_title("Mondlichttruhen-Event")
+                    say_reward("Wie lange soll das Event gehen?")
+                    say_reward("Länge in Stunden eingeben: ")
+                    zeit = input()
+                    if zeit == '' then
+                        return
+                    else
+                    zeit_h = tonumber(zeit)
+                    say_title("Mondlichttruhen Event")
+                    say("")
+                    say_reward("Möchtest du das Event für" ..zeit_h.." Stunden laufen lassen?")
+                    local b = select("Ja", "Nein")
+                        if b == 1 then
+                            server_timer("event_zeit", zeit_h*60*60)
+                            game.set_event_flag("event_2", 1)
+                            notice_all("Das Mondlichttruhen-Event hat gestartet")
+                        else
+                            return
+                        end
+                    end
+                else
+                    return
+                end
+            else
+                say_title("Mondlichttruhen-Event")
+                say("")
+                say_reward("Das Mondlichttruhen-Event ist An")
+                say_reward("Möchtest du es Anhalten?")
+                local c = select("Ja", "Nein")
+                if c == 1 then
+                game.set_event_flag("event_2", 0)
+                notice_all("Das Mondlichttruhen-Event wurde beendet")
+                else
+                    return
+                end
+            end
+        end
+        when event_zeit.server_timer with game.get_event_flag("event_2") != 0 begin
+            game.set_event_flag("event_2", 0)
+            notice_all("Das Mondlichttruhen-Event wurde beendet")
+        end
+        when kill with game.get_event_flag("event_2") == 1 and not npc.is_pc() begin
+            local s=number(1, 250)
+            if 5 == s then
+                game.drop_item_with_ownership(50011,1)
+            end
+        end
+    end
+end  

@@ -1,0 +1,18 @@
+quest millitar_pferd begin
+	state start begin
+		when 20349.chat."Millitär Pferd" begin
+			say_title("Stallbursche:")
+			say("Du willst ein Militär Pferd?")
+			say("Damit kann ich dienen, meine Pferde sind die")
+			say("besten in ganz Servername!")
+			say("")
+			wait()
+			say_reward("Du hast das Millitärpferde Buch erhalten")
+            pc.give_item2 ( "50053" , 1 )
+            horse.set_level("21")
+			set_state(complete)
+        end
+    end
+    state complete begin
+    end
+end

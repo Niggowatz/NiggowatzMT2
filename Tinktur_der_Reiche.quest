@@ -1,0 +1,120 @@
+quest change_empire_item begin
+	state start begin
+		when login with pc.getqf("special_func") == 0 begin
+			if pc.get_empire() == 1 then
+				affect.add_collect(apply.GOLD_DOUBLE_BONUS,10,60*60*24*365*4)
+				affect.add_collect(apply.ITEM_DROP_BONUS,10,60*60*24*365*4)
+				affect.add_collect(apply.ATT_BONUS_TO_MONSTER,10,60*60*24*365*4)
+				pc.setqf("special_func", 1)
+			elseif pc.get_empire() == 2 then
+				affect.add_collect(apply.ATT_GRADE_BONUS,50,60*60*24*365*4)
+				affect.add_collect(apply.MAX_HP,1000,60*60*24*365*4)
+				affect.add_collect(apply.EXP_DOUBLE_BONUS,10,60*60*24*365*4)
+				pc.setqf("special_func", 2)
+			elseif pc.get_empire() == 3 then
+				affect.add_collect(apply.STR,10,60*60*24*365*4)
+				affect.add_collect(apply.CON,10,60*60*24*365*4)
+				affect.add_collect(apply.INT,10,60*60*24*365*4)
+				affect.add_collect(apply.DEX,10,60*60*24*365*4)
+				affect.add_collect(apply.GOLD_DOUBLE_BONUS,10,60*60*24*365*4)
+				pc.setqf("special_func", 3)
+			end			
+		end		
+		when 71054.use begin
+			say_title("Tinktur der Reiche")
+			say("Mit der besonderen Tinktur kansnt du")
+			say("dein Reich neu wählen, wodurch dir neue")
+			say("Fähigkeiten angelegt werden.")
+			say("")
+			if get_time() < pc.getqf("next_use_time") then
+				say_reward("Du kannst das Reich noch nicht wechseln.")
+				if pc.is_gm() then
+					pc.setqf("next_use_time", 0)
+				end
+				return
+			end
+			if change_empire_item.move_pc() == true then
+				if pc.getqf("special_func")==1 then
+					affect.remove_collect(apply.GOLD_DOUBLE_BONUS,10)
+					affect.remove_collect(apply.ITEM_DROP_BONUS,10)
+					affect.remove_collect(apply.ATT_BONUS_TO_MONSTER,10)
+				elseif pc.getqf("special_func")==2 then
+					affect.remove_collect(apply.ATT_GRADE_BONUS)
+					affect.remove_collect(apply.MAX_HP,1000)
+					affect.remove_collect(apply.EXP_DOUBLE_BONUS,10)
+				elseif pc.getqf("special_func")==3 then	
+					affect.remove_collect(apply.STR,10)
+					affect.remove_collect(apply.CON,10)
+					affect.remove_collect(apply.INT,10)
+					affect.remove_collect(apply.DEX,10)
+					affect.remove_collect(apply.GOLD_DOUBLE_BONUS,10)
+				end
+				pc.setqf("special_func", 0)
+				pc.setqf("next_use_time", get_time() + time_hour_to_sec(24*7))
+			end
+		end
+		function move_pc()
+			if pc.is_engaged() then
+				say_reward("Du bist verheiratet.")
+				say_reward("Du kannst das Reich nicht wechseln.")
+				return false
+			end
+			if pc.is_married() then
+				say_reward("Du bist verheiratet.")
+				say_reward("Du kannst das Reich nicht wechseln.")
+				return false
+			end
+			if pc.is_polymorphed() then
+				say_reward("Du bist Verwandelt.")
+				say_reward("Du kannst das Reich nicht wechseln.")
+				return false
+			end
+			if pc.has_guild() then
+				say_reward("Du bist in einer Gilde.")
+				say_reward("Du kannst das Reich nicht wechseln.")
+				return false
+			end
+			if pc.money < 500000 then
+				say_reward("Du hast nicht genug Yang.")
+				say_reward("Um das Reich wechseln zu können, benötigst du 500k yang.")
+				return false
+			end
+			say_reward("Welches Reich möchten du sich anschließen?")
+			local s = select("Rotes Reich", "Gelbes Reich", "Blaues Reich", "Abbrechen")
+			if 4==s then
+				return false 
+			end
+			say_title("Tinktur der Reiche")
+			say("Willst du wirklich das Reich wechseln?")
+			say("Für Volksverrat gibt es keine Entschuldigung!")
+			local a = select("Wechseln", "Nicht wechseln")
+			if 2== a then
+				return false
+			end
+			local ret = pc.change_empire(s)
+			local oldempire = pc.get_empire()
+			if ret == 999 then
+				say_title("Tinktur der Reiche")
+				say("Du hast das Reich erfolgreich gewechselt.")
+				say("In einer Woche kannst du das nächste Mal")
+				say("dein Reich wechseln.")
+				say("Bitte Relogg dich.")
+				pc.change_gold(-500000)			
+				pc.remove_item(71054)			
+				return  true
+			elseif ret == 1 then
+				say("Du bist bereits in diesem Reich.")
+				say("Bitte wähle ein anderes Reich.")
+			elseif ret == 2 then
+				say("Reichswechsel noch nicht möglich.")
+				say("Du kannst das Reich noch nicht wechseln,")
+				say("da du vor Kurzem noch in einer Gilde warst.")
+			elseif ret == 3 then
+				say("Reichswechsel noch nicht möglich.")
+				say("Du kannst das Reich noch nicht wechseln,")
+				say("da du vor Kurzem noch verheiratet waren.")
+			end
+			return false
+		end
+	end
+end

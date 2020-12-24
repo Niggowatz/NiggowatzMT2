@@ -1,0 +1,28 @@
+quest truhe begin
+    state start begin
+        when 50186.use begin                        
+            local box = {
+                -- Pets --
+                53001, 53002, 53003, 53005, 53006, 53007, 53008, 53009,        
+                -- Perlen --
+                27992, 27993, 27994, 27992, 27993, 27994, 71135, 71136, 71143,
+                --Schild--
+                13140,
+                -- Sonstiges --
+                25041,
+                        }
+            local give,a = number(1, 3),{}
+            local items
+            for i = 1, give do
+                items = number(1, table.getn(box))
+                table.insert(a,i,box[items])
+            end
+            table.foreach(a,
+                function(i,l)
+                    pc.give_item2(l)
+                end
+            )
+            item.remove()
+        end
+    end
+end  

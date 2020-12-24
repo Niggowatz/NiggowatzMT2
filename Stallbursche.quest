@@ -1,0 +1,42 @@
+quest horse_guard begin
+	state start begin
+		when 20349.chat."Information" begin
+			local s=number(1, 7)
+			say_title("Stallbursche")
+			if 1>=s then
+				say("Füttere dein Pferd")
+				say("regelmässig sonst")
+				say("stirbt es.")
+			elseif 2>=s then 
+				say("Das Anfängerpferd")
+				say("ist sehr schnell erschöpft.")
+				say("Bleibe nicht auf seinem Rücken stehen.")
+			elseif 3>=s then 
+				say("Um dein Pferd zu verbessern")
+				say("benötigst du Pferdemedallien.")
+				say("Du findest sie in den")
+				say("unterschiedlichen Affendungeon´s.")
+			elseif 4>=s then 
+				say("Wenn dein Pferd gestorben")
+				say("ist gibt es mehrere")
+				say("Kräuter von den")
+				say("Affenkönigen um")
+				say("sie Wiederzubeleben.")
+			elseif 5>=s then 
+				say("Es gibt 9 verschiedene")
+				say("Pferde Aussehen.")
+				say("Ohne Gilde, mit Gilde und als Leader.")
+			elseif 6>=s then 
+				say("Das Anfängerpferd")
+				say("isst gerne Heu.")
+				say("Das Kampfpferd")
+				say("isst gerne Karotten.")
+				say("Das Militärpferd")
+				say("isst gerne Roten Ginseng.")
+			elseif 7>=s then 
+				say("Lese Handbuch Pferde Zähmen")
+				say("um dein Pferd schneller zu rufen.")
+			end
+		end
+	end	
+end

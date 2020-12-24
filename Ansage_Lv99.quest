@@ -1,0 +1,10 @@
+quest lvl150 begin 
+    state start begin 
+        when levelup with pc.get_level() == 115 begin 
+            notice_all("".. pc.get_name() .." hat das Level 115 erreicht.") 
+            set_state(__complete) 
+        end 
+    end 
+    state __complete begin 
+    end 
+end 
